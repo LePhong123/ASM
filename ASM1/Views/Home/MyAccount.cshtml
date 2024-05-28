@@ -1,0 +1,234 @@
+﻿@using ASM.IServices
+@using ASM.Services
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model User
+@{
+    IUserServices _service = new UserServices();
+    IRoleServices _roleServices = new RoleServices();
+    IBillServices _billServices = new BillServices();
+    IProductServices _productServices = new ProductServices();
+    IBillDetailsServices _billDetailsServices = new BillDetailsService();
+    var id = ViewData["idUser"] as string;
+    var IdUser = Guid.Parse(id);
+    var user = _service.GetUserById(IdUser);
+
+}
+@if (ViewBag.AlertMessage != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @ViewBag.AlertMessage
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+}
+<div class="container" style="margin-top: 200px">
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link btn btn-primary active" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home"
+               aria-selected="true">
+                Bill
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link btn btn-primary  ml-2" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile"
+               aria-selected="false">
+                Settings
+            </a>
+        </li>
+    </ul>
+    <div class="tab-content" id="myTabContent">
+        <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+            <div class="wrapper bg-white mt-sm-5">
+                @if (_billServices.GetAllBills().Where(p => p.UserID == user.Id).Count() > 0)
+                {
+                    <h2>Show List Bill</h2>
+                    <select id="filter-select">
+                        <option value="all" selected>Choose option</option>
+                        <option value="pay">Pay</option>
+                        <option value="wait">Wait</option>
+                    </select>
+                    <table class="table mt-">
+                        <thead>
+                        <tr>
+                            <th>Stt</th>
+                            <th>
+                                Create Date
+                            </th>
+                            <th>
+                                Status
+                            </th>
+                            <th>
+                                Action
+                            </th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        @{
+                            var i = 1;
+                        }
+                        @foreach (var item in _billServices.GetAllBills().Where(p => p.UserID == user.Id).ToList())
+                        {
+                            <tr class="@item.Status">
+                                <td>
+                                    Bill- @i
+                                </td>
+                                <td>
+                                    @item.CreateDate.ToLocalTime().ToString("F")
+                                </td>
+                                <td class="status-column">
+                                    @if (item.Status == 0)
+                                    {
+                                        <p class="text-danger">Wait</p>
+                                    }
+                                    else
+                                    {
+                                        <p class="text-success">Pay</p>
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.Status == 0)
+                                    {
+                                        <a class="btn btn-success" onclick="confirmPay()">
+                                            <span>Pay</span>
+                                        </a>
+                                    }
+                                    <a class="btn btn-danger view-btn">View</a>
+                                    <a class="btn btn-danger" onclick="confirmDelete()">
+                                        <span>Delete</span>
+                                    </a>
+                                </td>
+                                <script>
+                                        function confirmDelete() {
+                                            if (confirm("Are you sure you want to DELETE this item?")) {
+                                                window.location.href = '@Url.Action("DeleteInMyAccount", "Bill",new{id = item.Id})/';
+                                            }
+                                        }
+                                        function confirmPay() {
+                                            if (confirm("Are you sure you want to PAY this item?")) {
+                                                window.location.href = '@Url.Action("Update", "Bill",new{id = item.Id})/';
+                                            }
+                                        }
+                                    </script>
+                            </tr>
+                            <tr class="details-row" style="display:none">
+                                <td colspan="4">
+                                    @Html.Partial("PopupView", item)
+                                </td>
+                            </tr>
+                            i++;
+                        }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <h2>No bill? Go to shop? <a asp-action="Shop">Now</a></h2>
+                }
+            </div>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+            <script>
+                $('.view-btn').on('click', function () {
+                    var detailsRow = $(this).closest('tr').next('.details-row');
+                    detailsRow.toggle();
+                });
+                $(document).ready(function () {
+                    // handle change event of filter-select
+                    $('#filter-select').on('change', function () {
+                        var selectedOption = $(this).val();
+                        if (selectedOption === 'all') {
+                            // show all rows if all option is selected
+                            $('tbody tr').show();
+                        } else {
+                            // hide all rows except the ones with the selected class
+                            $('tbody tr').hide();
+                            $('tbody tr.' + selectedOption).show();
+                        }
+                        $('tbody tr').each(function () {
+                            if (selectedOption === 'all') {
+                                // reset all status values to original text
+                                $(this).find('.status-column p').text(function () {
+                                    return $(this).hasClass('text-danger') ? 'Wait' : 'Pay';
+                                });
+                            } else {
+                                $(this).find('.status-column p').each(function () {
+                                    var statusText = $(this).text().toLowerCase();
+                                    if (statusText.indexOf(selectedOption) !== -1) {
+                                        $(this).parent().parent().show();
+                                    } else {
+                                        $(this).parent().parent().hide();
+                                    }
+                                });
+                            }
+                        });
+                    });
+                });
+
+            </script>
+        </div>
+
+        <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+            <div class="wrapper bg-white mt-sm-5">
+                <h4 class="pb-4 border-bottom">Account settings</h4>
+                <form class="py-2" asp-action="Edit" asp-controller="User">
+                    <div class="row py-2">
+                        <div class="col-md-6">
+                            <input required asp-for="RoleId" value="@user.RoleId" hidden />
+                        </div>
+                        <div class="col-md-6 pt-md-0 pt-3">
+                            <input required asp-for="Status" value="@user.Status" hidden />
+                        </div>
+                    </div>
+                    <div class="row py-2">
+                        <div class="col-md-6">
+                            <label for="firstname">User Name</label>
+                            <input type="text" class="bg-light form-control" required asp-for="Username" re>
+                        </div>
+                        <div class="col-md-6 pt-md-0 pt-3">
+                            <label for="lastname">Full Name</label>
+                            <input type="text" class="bg-light form-control" required asp-for="Name">
+                        </div>
+                    </div>
+                    <div class="row py-2">
+                        <div class="col-md-6">
+                            <label for="email">Email Address</label>
+                            <input type="email" class="bg-light form-control" required asp-for="Email">
+                        </div>
+                        <div class="col-md-6 pt-md-0 pt-3">
+                            <label for="phone">Phone Number</label>
+                            <input type="tel" class="bg-light form-control" required asp-for="NumberPhone">
+                        </div>
+                    </div>
+                    <div class="row py-2">
+                        <div class="col-md-6 pt-md-0 pt-3">
+                            <label for="phone">Password</label>
+                            <input type="text" class="bg-light form-control" required asp-for="Password">
+                        </div>
+                    </div>
+                    <div class="py-3 pb-4 border-bottom">
+                        <button class="btn btn-primary mr-3" type="submit">Save Changes</button>
+                        <button class="btn border button" asp-action="Index">Cancel</button>
+                    </div>
+                </form>
+                <div class="d-sm-flex align-items-center pt-3" id="deactivate">
+                    <div>
+                        <b>Deactivate your account</b>
+                        <p>Details about your company account and password</p>
+                    </div>
+                    <div class="ml-auto">
+                        <a class="btn btn-danger" onclick="confirmDlAc()">
+                            <span>Delete Account <i class="fa-user"></i></span>
+                        </a>
+                    </div>
+                    <script>
+                        function confirmDlAc() {
+                            if (confirm("Are you sure you want to PAY this item?")) {
+                                window.location.href = '@Url.Action("Delete", "Home",new{ id = user.Id })/';
+                            }
+                        }
+                    </script>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

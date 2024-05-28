@@ -1,0 +1,15 @@
+@keyframes rotateIn {
+    from {
+        opacity: 0;
+        transform: rotate3d(0, 0, 1, -200deg);
+        transform-origin: center;
+    }
+
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+        transform-origin: center;
+    }
+}
+
+.rotateIn { animation-name: rotateIn; }

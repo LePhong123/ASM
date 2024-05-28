@@ -1,0 +1,42 @@
+﻿@{
+    ViewData["Title"] = "Login";
+    Layout = "~/Views/Shared/_LayoutLogin.cshtml";
+
+}
+<link rel="stylesheet" href="~/assets/css/StyleLoginAdmin.css">
+@if (ViewBag.ErrorMessage != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show container fixed-top" role="alert">
+        @ViewBag.ErrorMessage
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+}
+<div class="wrapper fadeInDown">
+    <div id="formContent">
+        <!-- Tabs Titles --
+        <!-- Icon -->
+        <h2>LOGIN ADMIN</h2>
+        <div class="fadeIn first">
+            <img src="~/images/users.svg" id="icon" alt="User Icon" style="width: 100px"/>
+        </div>
+        <!-- Login Form -->
+        <form method="post" asp-controller="Admin" asp-action="Login">
+            <div class="form-group">
+                <label>Username:</label>
+                <input type="text" name="Username">
+            </div>
+            <div class="form-group">
+                <label >Password:</label>
+                <input type="password" name="Password">
+            </div>
+            <input type="submit" class="btn btn-primary" value="LOGIN">
+        </form>
+        <!-- Remind Passowrd -->
+        <div id="formFooter" class="mt-3">
+            <a class="underlineHover" asp-action="Register">Create New Account ?</a>
+        </div>
+        <!-- Modal -->
+    </div>
+</div>

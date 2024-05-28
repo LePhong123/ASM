@@ -1,0 +1,14 @@
+@keyframes rotateOutDownLeft {
+    from {
+        opacity: 1;
+        transform-origin: left bottom;
+    }
+
+    to {
+        opacity: 0;
+        transform: rotate3d(0, 0, 1, 45deg);
+        transform-origin: left bottom;
+    }
+}
+
+.rotateOutDownLeft { animation-name: rotateOutDownLeft; }

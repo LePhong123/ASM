@@ -1,0 +1,65 @@
+﻿@using ASM.IServices
+@using ASM.Services
+@model User
+@{
+    IUserServices _service = new UserServices();
+    IRoleServices _roleServices = new RoleServices();
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    var id = ViewData["idUsers"] as string;
+    var IdUser = Guid.Parse(id);
+    var user = _service.GetUserById(IdUser);
+
+}
+<div class="wrapper bg-white mt-sm-5 container">
+    <h4 class="pb-4 border-bottom">Account settings</h4>
+    <form class="py-2"method="post" enctype="multipart/form-data">
+        <div class="row py-2">
+            <div class="col-md-6">
+                <label asp-for="RoleId" class="control-label"></label>
+                <select asp-for="RoleId" class="form-control">
+                    @foreach (var item in _roleServices.GetAllRoles().ToList())
+                    {
+                        if (item.Status == 1)
+                        {
+                            <option value="@item.Id">@item.RoleName</option>
+                        }
+                    }
+                </select>
+                <span asp-validation-for="RoleId" class="text-danger"></span>
+            </div>
+            <div class="col-md-6 pt-md-0 pt-3">
+                <label asp-for="Username" class="control-label"></label>
+                <input asp-for="Username" class="form-control" value="@user.Username"/>
+                <span asp-validation-for="Username" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="row py-2">
+            <div class="col-md-6">
+                <label asp-for="Name" class="control-label"></label>
+                <input asp-for="Name" class="form-control" value="@user.Name"/>
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="col-md-6 pt-md-0 pt-3">
+                <label asp-for="Email" class="control-label"></label>
+                <input asp-for="Email" class="form-control" value="@user.Email"/>
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="row py-2">
+            <div class="col-md-6">
+                <label asp-for="NumberPhone" class="control-label"></label>
+                <input asp-for="NumberPhone" class="form-control" value="@user.NumberPhone"/>
+                <span asp-validation-for="NumberPhone" class="text-danger"></span>
+            </div>
+            <div class="col-md-6 pt-md-0 pt-3">
+                <label asp-for="Password" class="control-label"></label>
+                <input asp-for="Password" class="form-control" value="@user.Password"/>
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+        </div>
+        @{ user.Status = 1; }
+        <div class="py-3 pb-4 border-bottom">
+            <button class="btn btn-danger" asp-controller="Admin" asp-action="HomePage">Back To Home</button>
+        </div>
+    </form>
+</div>
