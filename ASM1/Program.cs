@@ -31,7 +31,7 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.UseAuthorization();
-
+app.UseSession();
 app.MapControllerRoute("default", "{controller=Admin}/{action=Index}/{id?}");
 
 app.Run();

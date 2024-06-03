@@ -5,6 +5,7 @@ using ASM.Models;
 using ASM.Services;
 
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 public class RoleController : Controller
 {
@@ -57,8 +58,11 @@ public class RoleController : Controller
 
     public IActionResult ShowList()
     {
-        var role = this._roleServices.GetAllRoles();
-        return this.View(role.ToList());
+        List<Role> products = _roleServices.GetAllRoles();
+        // Thêm list này vào Session
+        HttpContext.Session.SetString("Product", JsonConvert.SerializeObject(products));
+        // JsonConvert.SerializeObject(products) => Chuyển từ List sang Json string
+        return View(products);
     }
 
     public IActionResult HistoryDeleteOfRole()
